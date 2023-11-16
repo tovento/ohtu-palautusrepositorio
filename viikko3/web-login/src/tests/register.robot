@@ -33,6 +33,31 @@ Register With Nonmatching Password And Password Confirmation
     Submit Credentials
     Registering Should Fail With Message  Passwords don't match
 
+Login After Successful Registration
+    Set Username  hilppa
+    Set Password  hilppa123
+    Confirm Password  hilppa123
+    Submit Credentials
+    Registering Should Succeed
+    Go To Login Page
+    Set Username  hilppa
+    Set Password  hilppa123
+    Click Button  Login
+    Main Page Should Be Open
+
+Login After Failed Registration
+    Set Username  marjaana
+    Set Password  qwerty
+    Confirm Password  qwerty
+    Submit Credentials
+    Registering Should Fail With Message  Password should not contain only letters
+    Go To Login Page
+    Set Username  marjaana
+    Set Password  qwerty
+    Click Button  Login
+    Login Page Should Be Open
+    Page Should Contain  Invalid username or password
+
 *** Keywords ***
 Set Username
     [Arguments]  ${username}
