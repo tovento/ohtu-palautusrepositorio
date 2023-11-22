@@ -14,6 +14,12 @@ class Kayttoliittyma:
         self._sovellus = sovellus
         self._root = root
 
+        self._komennot = {
+            Komento.SUMMA: Summa(sovellus, self._lue_syote),
+            Komento.EROTUS: Erotus(sovellus, self._lue_syote),
+            Komento.NOLLAUS: Nollaus(sovellus)
+        }
+
     def kaynnista(self):
         self._arvo_var = StringVar()
         self._arvo_var.set(self._sovellus.arvo())
@@ -54,22 +60,13 @@ class Kayttoliittyma:
         self._nollaus_painike.grid(row=2, column=2)
         self._kumoa_painike.grid(row=2, column=3)
 
+    def _lue_syote(self):
+        return int(self._syote_kentta.get())
+
     def _suorita_komento(self, komento):
-        arvo = 0
+        komento_olio = self._komennot[komento]
+        komento_olio.suorita()
 
-        try:
-            arvo = int(self._syote_kentta.get())
-        except Exception:
-            pass
-
-        if komento == Komento.SUMMA:
-            self._sovellus.plus(arvo)
-        elif komento == Komento.EROTUS:
-            self._sovellus.miinus(arvo)
-        elif komento == Komento.NOLLAUS:
-            self._sovellus.nollaa()
-        elif komento == Komento.KUMOA:
-            pass
 
         self._kumoa_painike["state"] = constants.NORMAL
 
@@ -80,3 +77,28 @@ class Kayttoliittyma:
 
         self._syote_kentta.delete(0, constants.END)
         self._arvo_var.set(self._sovellus.arvo())
+
+class Summa:
+    def __init__(self, sovellus, funktio):
+        self.sovellus = sovellus
+        self.funktio = funktio
+
+    def suorita(self):
+        operandi = self.funktio()
+        self.sovellus.plus(operandi)
+
+class Erotus:
+    def __init__(self, sovellus, funktio):
+        self.sovellus = sovellus
+        self.funktio = funktio
+
+    def suorita(self):
+        operandi = self.funktio()
+        self.sovellus.miinus(operandi)
+
+class Nollaus:
+    def __init__(self, sovellus):
+        self.sovellus = sovellus
+
+    def suorita(self):
+        self.sovellus.nollaa()
