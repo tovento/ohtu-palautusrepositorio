@@ -9,9 +9,7 @@ class TestKauppa(unittest.TestCase):
     def setUp(self):
         self.pankki_mock = Mock()
 
-        self.viitegeneraattori_mock = Mock()
-        # palautetaan aina arvo 42
-        self.viitegeneraattori_mock.uusi.return_value = 42
+        self.viitegeneraattori_mock = Mock(wraps=Viitegeneraattori())
 
         self.varasto_mock = Mock()
 
@@ -59,7 +57,7 @@ class TestKauppa(unittest.TestCase):
 
         self.pankki_mock.tilisiirto.assert_called_with(
             "pekka",
-            42,
+            ANY,
             "12345",
             "33333-44455",
             5)
@@ -72,7 +70,7 @@ class TestKauppa(unittest.TestCase):
 
         self.pankki_mock.tilisiirto.assert_called_with(
             "pekka",
-            42,
+            ANY,
             "12345",
             "33333-44455",
             8)
@@ -85,7 +83,7 @@ class TestKauppa(unittest.TestCase):
 
         self.pankki_mock.tilisiirto.assert_called_with(
             "pekka",
-            42,
+            ANY,
             "12345",
             "33333-44455",
             10)
@@ -98,7 +96,47 @@ class TestKauppa(unittest.TestCase):
 
         self.pankki_mock.tilisiirto.assert_called_with(
             "pekka",
-            42,
+            ANY,
             "12345",
             "33333-44455",
             5)
+
+    def test_aloita_asiointi_nollaa_korin(self):
+        self.kauppa.aloita_asiointi()
+        self.kauppa.lisaa_koriin(1)
+        self.kauppa.aloita_asiointi()
+        self.kauppa.lisaa_koriin(2)
+
+        self.kauppa.tilimaksu("pekka", "12345")
+
+        self.pankki_mock.tilisiirto.assert_called_with(
+            ANY, ANY, ANY, ANY, 3)
+
+    def test_kauppa_pyytaa_uuden_viitenumeron_jokaiselle_maksulle(self):
+        self.kauppa.aloita_asiointi()
+        self.kauppa.lisaa_koriin(1)
+        self.kauppa.tilimaksu("pekka", "12345")
+
+        self.assertEqual(self.viitegeneraattori_mock.uusi.call_count, 1)
+
+        self.kauppa.aloita_asiointi()
+        self.kauppa.lisaa_koriin(2)
+        self.kauppa.tilimaksu("pekka", "12345")
+
+        self.assertEqual(self.viitegeneraattori_mock.uusi.call_count, 2)
+
+        self.kauppa.aloita_asiointi()
+        self.kauppa.lisaa_koriin(2)
+        self.kauppa.tilimaksu("minna", "09876")
+
+        self.assertEqual(self.viitegeneraattori_mock.uusi.call_count, 3)
+
+    def test_poista_korista_toimii(self):
+        self.kauppa.aloita_asiointi()
+        self.kauppa.lisaa_koriin(1)
+        self.kauppa.lisaa_koriin(2)
+        self.kauppa.poista_korista(1)
+        self.kauppa.tilimaksu("pekka", "12345")
+
+        self.pankki_mock.tilisiirto.assert_called_with(
+            ANY, ANY, ANY, ANY, 3)
