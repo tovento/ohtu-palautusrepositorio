@@ -17,7 +17,8 @@ class Kayttoliittyma:
         self._komennot = {
             Komento.SUMMA: Summa(sovellus, self._lue_syote),
             Komento.EROTUS: Erotus(sovellus, self._lue_syote),
-            Komento.NOLLAUS: Nollaus(sovellus)
+            Komento.NOLLAUS: Nollaus(sovellus),
+            Komento.KUMOA: Kumoa(sovellus)
         }
 
     def kaynnista(self):
@@ -78,6 +79,7 @@ class Kayttoliittyma:
         self._syote_kentta.delete(0, constants.END)
         self._arvo_var.set(self._sovellus.arvo())
 
+
 class Summa:
     def __init__(self, sovellus, funktio):
         self.sovellus = sovellus
@@ -102,3 +104,11 @@ class Nollaus:
 
     def suorita(self):
         self.sovellus.nollaa()
+
+class Kumoa:
+    def __init__(self, sovellus):
+        self.sovellus = sovellus
+
+    def suorita(self):
+        edellinen_arvo = self.sovellus.edellinen_arvo()
+        self.sovellus.aseta_arvo(edellinen_arvo)
