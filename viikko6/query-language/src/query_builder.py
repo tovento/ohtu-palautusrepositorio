@@ -17,3 +17,6 @@ class QueryBuilder:
     def hasFewerThan(self, amount, point_type):
         return QueryBuilder(
             And(self.query_object, HasFewerThan(amount, point_type)))
+
+    def oneOf(self, query1, query2):
+        return QueryBuilder(Or(query1, query2))
